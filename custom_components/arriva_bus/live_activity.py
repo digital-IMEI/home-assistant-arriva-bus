@@ -75,6 +75,25 @@ def _activity_color(
     return on_time_color if delay_seconds is not None else _DEFAULT_COLOR
 
 
+def _activity_icon(data: BusSnapshot) -> str:
+    """Choose an icon that communicates the current journey state."""
+    if data.last_journey_cancelled:
+        return "mdi:cancel"
+    if data.realtime_stale:
+        return "mdi:cloud-alert"
+    if data.target_has_passed:
+        return "mdi:bus-stop"
+    if not data.is_underway:
+        return "mdi:clock-outline"
+    if data.scheduled_wait_until is not None or data.current_stop:
+        return "mdi:bus-stop"
+    if data.delay_seconds is not None and data.delay_seconds > 60:
+        return "mdi:bus-alert"
+    if data.delay_seconds is not None and data.delay_seconds <= -30:
+        return "mdi:fast-forward"
+    return "mdi:bus"
+
+
 def _title(data: BusSnapshot, language: str = "nl") -> str:
     """Use the scheduled journey time instead of the Companion app name."""
     prefix = (
@@ -342,6 +361,7 @@ class ArrivaLiveActivity:
             payload["message"],
             payload["data"]["critical_text"],
             payload["data"]["notification_icon_color"],
+            payload["data"]["notification_icon"],
             payload["data"].get("progress"),
         )
         if self._active and fingerprint == self._last_payload:
@@ -422,7 +442,7 @@ class ArrivaLiveActivity:
                     if data.is_underway
                     else ("wacht" if language == "nl" else "waiting")
                 ),
-                "notification_icon": "mdi:bus-clock",
+                "notification_icon": _activity_icon(data),
                 "notification_icon_color": color,
                 "progress_bar_color": color,
                 **(

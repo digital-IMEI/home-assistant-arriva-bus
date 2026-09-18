@@ -1,5 +1,14 @@
-Arriva Bus 1.1.2 makes first-time setup more immediate and improves the public
+Arriva Bus 1.1.3 improves branding, journey-state recognition and the public
 documentation.
+
+- Replaces the packaged generic bus artwork with Arriva branding.
+- Adds status-dependent Live Activity icons for waiting, underway, at a stop, early,
+  delayed, cancelled and temporarily unavailable realtime data.
+- Clarifies that the integration follows the first upcoming bus arriving at the selected
+  stop and then automatically advances to the following journey.
+- Expands the README with waiting, on-time and delayed Live Activity screenshots.
+
+It also retains the first-setup improvements from 1.1.2:
 
 - A newly configured route now starts tracking explicitly during its first setup.
 - Later restarts still respect a manually or automatically disabled runtime switch.

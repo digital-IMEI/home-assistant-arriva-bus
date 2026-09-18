@@ -12,6 +12,7 @@ from homeassistant.exceptions import HomeAssistantError
 from custom_components.arriva_bus.live_activity import (
     ArrivaLiveActivity,
     _activity_color,
+    _activity_icon,
     _critical_delay_text,
     _format_duration,
     _message,
@@ -56,6 +57,27 @@ def test_status_colors_override_delay_when_no_running_bus(changes, expected):
     payload = manager._payload(snapshot)
     assert payload["data"]["notification_icon_color"] == expected
     assert payload["data"]["progress_bar_color"] == expected
+
+
+@pytest.mark.parametrize(
+    "changes,expected",
+    [
+        ({"is_underway": False}, "mdi:clock-outline"),
+        ({"delay_seconds": 0}, "mdi:bus"),
+        ({"delay_seconds": 61}, "mdi:bus-alert"),
+        ({"delay_seconds": -30}, "mdi:fast-forward"),
+        ({"current_stop": "Gulpen"}, "mdi:bus-stop"),
+        (
+            {"scheduled_wait_until": datetime(2026, 9, 17, 12, tzinfo=UTC)},
+            "mdi:bus-stop",
+        ),
+        ({"target_has_passed": True}, "mdi:bus-stop"),
+        ({"realtime_stale": True}, "mdi:cloud-alert"),
+        ({"last_journey_cancelled": True}, "mdi:cancel"),
+    ],
+)
+def test_live_activity_icon_matches_journey_status(changes, expected):
+    assert _activity_icon(replace(_underway(), **changes)) == expected
 
 
 def test_missing_delay_is_not_reported_as_on_time() -> None:
