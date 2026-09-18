@@ -1,12 +1,21 @@
 # Arriva Bus for Home Assistant
 
 <p align="center">
-  <img src="custom_components/arriva_bus/brand/logo.png" alt="Arriva" width="256">
+  <img src="custom_components/arriva_bus/brand/logo.png" alt="Arriva" width="96">
 </p>
 
 [![GitHub Release](https://img.shields.io/github/v/release/digital-IMEI/home-assistant-arriva-bus)](https://github.com/digital-IMEI/home-assistant-arriva-bus/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.8.2%2B-41BDF5.svg)](https://www.home-assistant.io/)
+
+<p align="center">
+  <img src="docs/images/live-activity-hero.svg" alt="iPhone Live Activity: Line 7 to Efteling, 2 minutes 5 seconds late, with last passed stop and route progress" width="900">
+</p>
+
+**Your next bus, live on your iPhone.** Pick your line, destination and stop —
+keep the next arrival in view on your Lock Screen and Dynamic Island.
+
+[Install with HACS](#installation-with-hacs) · [Explore the entities](#available-entities) · [Share feedback](https://github.com/digital-IMEI/home-assistant-arriva-bus/issues)
 
 See the live times of the **next Arriva bus arriving at your selected stop**, directly
 in Home Assistant. Choose a line, destination and stop from searchable lists; the
@@ -63,10 +72,22 @@ disable the Live Activity without disabling bus tracking.
 ### Live Activity examples
 
 <p align="center">
-  <img src="docs/images/live-activity-waiting.jpeg" alt="Arriva Bus Live Activity waiting to depart" width="250">
-  <img src="docs/images/live-activity-on-time.jpeg" alt="Arriva Bus Live Activity on time" width="250">
-  <img src="docs/images/live-activity-delayed.jpeg" alt="Arriva Bus Live Activity delayed" width="250">
+  <img src="docs/images/live-activity-gallery.svg" alt="Actual screenshots of waiting, on-time route progress and a delayed bus in the Dynamic Island" width="760">
 </p>
+
+Real screenshots, focused on the information you need. Captured before the
+status-specific icons introduced in v1.1.3; current icons are listed below.
+
+<details>
+<summary>View the original full-screen screenshots</summary>
+
+<p align="center">
+  <img src="docs/images/live-activity-waiting.jpeg" alt="Waiting: original Lock Screen" width="230">
+  <img src="docs/images/live-activity-on-time.jpeg" alt="On time: original Lock Screen" width="230">
+  <img src="docs/images/live-activity-delayed.jpeg" alt="Delayed: original Lock Screen" width="230">
+</p>
+
+</details>
 
 The waiting state stays compact and deliberately omits the progress bar. Once underway,
 the bar shows visual progress from the first stop to the stop selected during setup.
