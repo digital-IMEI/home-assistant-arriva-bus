@@ -1,0 +1,113 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select an Arriva line",
+        "description": "Select a line from the timetable. Optionally type a line number or town to filter the list. Next, choose destination and stop.",
+        "data": {
+          "line": "Line"
+        }
+      },
+      "stop": {
+        "title": "Select a stop",
+        "description": "Select the stop you want to follow in this direction.",
+        "data": {
+          "stop": "Stop"
+        }
+      },
+      "direction": {
+        "title": "Select destination",
+        "data": {
+          "direction": "Destination"
+        }
+      },
+      "devices": {
+        "title": "Live Activity and colours",
+        "description": "Optionally select multiple iPhones. The integration starts immediately. Use its switch or your own automation to turn it off.",
+        "data": {
+          "mobile_device": "Live Activity iPhones",
+          "delay_color": "Delay: more than 60 sec",
+          "early_color": "Early: 30 seconds or more",
+          "on_time_color": "On time: within tolerance"
+        },
+        "data_description": {
+          "delay_color": "More than 60 seconds late. Red by default. Clear the field or choose Default to reset.",
+          "early_color": "Green from 30 seconds early (−30 sec or earlier). Scheduled waiting does not count as early departure.",
+          "on_time_color": "White by default, from −29 through +60 seconds. Waiting and unavailable information are gray; a cancelled bus is red."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This line, destination and stop are already configured."
+    },
+    "error": {
+      "invalid_selection": "Choose an option from the list.",
+      "invalid_iphone": "Select an Apple iPhone connected through the Home Assistant Companion app.",
+      "catalog_unavailable": "No valid line catalogue available. Retry or install the latest integration version."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Live Activity and colours",
+        "description": "Control the integration with its switch or your own automation. Select one or more iPhones for Live Activity.",
+        "data": {
+          "mobile_device": "iPhones for Live Activity",
+          "delay_color": "Delay: more than 60 sec",
+          "early_color": "Early: 30 seconds or more",
+          "on_time_color": "On time: within tolerance"
+        },
+        "data_description": {
+          "mobile_device": "Optionally select one or more iPhones that should show the current journey on the Lock Screen and in the Dynamic Island.",
+          "delay_color": "More than 60 seconds late. Red by default. Clear the field or choose Default to reset.",
+          "early_color": "Green from 30 seconds early (−30 sec or earlier). Scheduled waiting does not count as early departure.",
+          "on_time_color": "White by default, from −29 through +60 seconds. Waiting and unavailable information are gray; a cancelled bus is red."
+        }
+      }
+    },
+    "error": {
+      "invalid_iphone": "Select an Apple iPhone connected through the Home Assistant Companion app.",
+      "device_clear_failed": "Could not end the activity on a removed device. Check connectivity and retry."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "delay": {
+        "name": "Current delay"
+      },
+      "last_passed_stop": {
+        "name": "Bus position"
+      },
+      "journey_status": {
+        "name": "Journey status",
+        "state": {
+          "no_bus": "No bus underway",
+          "waiting": "Waiting to depart",
+          "underway": "Underway",
+          "realtime_unavailable": "Realtime temporarily unavailable",
+          "cancelled": "Journey cancelled",
+          "previous_cancelled": "Previous journey cancelled"
+        }
+      },
+      "scheduled_target": {
+        "name": "Next stop passage"
+      }
+    }
+  },
+  "selector": {
+    "activity_color": {
+      "options": {
+        "green": "Green",
+        "red": "Red",
+        "orange": "Orange",
+        "yellow": "Yellow",
+        "blue": "Blue",
+        "purple": "Purple",
+        "pink": "Pink",
+        "white": "White",
+        "gray": "Gray",
+        "default": "Default (reset color)"
+      }
+    }
+  }
+}
