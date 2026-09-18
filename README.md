@@ -1,5 +1,7 @@
 # Arriva Bus for Home Assistant
 
+Live tracking for **Arriva buses in the Netherlands**, with optional iPhone Live Activities.
+
 <p align="center">
   <img src="custom_components/arriva_bus/brand/logo.png" alt="Arriva" width="96">
 </p>
@@ -17,7 +19,7 @@ keep the next arrival in view on your Lock Screen and Dynamic Island.
 
 [Install with HACS](#installation-with-hacs) · [Explore the entities](#available-entities) · [Share feedback](https://github.com/digital-IMEI/home-assistant-arriva-bus/issues)
 
-See the live times of the **next Arriva bus arriving at your selected stop**, directly
+See the live times of the **next Arriva bus arriving at your selected stop in the Netherlands**, directly
 in Home Assistant. Choose a line, destination and stop from searchable lists; the
 integration then follows the first upcoming journey for that exact combination and
 automatically moves on to the following journey after it has passed.
