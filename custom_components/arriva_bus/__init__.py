@@ -12,6 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import TransitHttpClient
 from .catalog import BUNDLED_CATALOG, CatalogError, decode_catalog
+from .const import CONF_INITIAL_ACTIVE
 from .coordinator import ArrivaCoordinator
 from .live_activity import ArrivaLiveActivity
 from .route_config import RouteConfig
@@ -46,6 +47,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     client = TransitHttpClient(async_get_clientsession(hass), route)
     coordinator = ArrivaCoordinator(hass, entry, client)
     await coordinator.async_start()
+    if entry.data.get(CONF_INITIAL_ACTIVE):
+        # Activate a newly created tracker before its entities are added. Remove
+        # the one-shot marker immediately so a restored off switch stays off on
+        # every later Home Assistant restart.
+        await coordinator.async_set_enabled(True)
+        hass.config_entries.async_update_entry(
+            entry,
+            data={key: value for key, value in entry.data.items() if key != CONF_INITIAL_ACTIVE},
+        )
     live_activity = ArrivaLiveActivity(hass, entry, coordinator)
     entry.runtime_data = ArrivaRuntimeData(coordinator, live_activity)
     try:

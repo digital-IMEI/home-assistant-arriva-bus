@@ -8,6 +8,7 @@ NAME = "Arriva Bus"
 DATA_OWNER = "ARR"
 
 CONF_MOBILE_DEVICE = "mobile_device"
+CONF_INITIAL_ACTIVE = "initial_active"
 LIVE_ACTIVITY_TAG = "arriva_bus"
 
 JOURNEY_STATUS_NO_BUS = "no_bus"

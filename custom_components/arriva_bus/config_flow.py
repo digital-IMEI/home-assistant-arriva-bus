@@ -25,6 +25,7 @@ from homeassistant.helpers.selector import (
 from .catalog import CatalogError, RouteCatalog, async_load_catalog
 from .colors import PALETTE, color_choice
 from .const import (
+    CONF_INITIAL_ACTIVE,
     CONF_MOBILE_DEVICE,
     DOMAIN,
 )
@@ -196,7 +197,12 @@ class ArrivaConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
                     title=self._route.title,
-                    data={**asdict(self._route), **user_input, CONF_MOBILE_DEVICE: devices},
+                    data={
+                        **asdict(self._route),
+                        **user_input,
+                        CONF_MOBILE_DEVICE: devices,
+                        CONF_INITIAL_ACTIVE: True,
+                    },
                 )
         return self.async_show_form(
             step_id="devices",

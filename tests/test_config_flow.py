@@ -152,6 +152,7 @@ async def test_full_config_flow_persists_discovered_route_without_technical_inpu
         **asdict(ROUTE),
         "destination_aliases": ("Centrum",),
         "mobile_device": [],
+        "initial_active": True,
         "delay_color": [10, 20, 30],
         "early_color": [255, 0, 0],
     }
@@ -493,6 +494,40 @@ async def test_setup_enriches_legacy_destination_without_changing_entry_identity
     assert "Maastricht Station" in runtime_route.destination_aliases
     assert entry.data is old_data
     assert "destination_aliases" not in entry.data
+
+
+@pytest.mark.asyncio
+async def test_first_setup_starts_active_and_consumes_one_shot_marker():
+    from custom_components.arriva_bus import async_setup_entry
+
+    entry = SimpleNamespace(
+        entry_id="new-route",
+        data={**asdict(ROUTE), "initial_active": True},
+        options={},
+    )
+    hass = MagicMock()
+
+    async def executor(fn, *args):
+        return fn(*args)
+
+    hass.async_add_executor_job = executor
+    hass.config_entries.async_forward_entry_setups = AsyncMock()
+    coordinator = AsyncMock()
+    with (
+        patch("custom_components.arriva_bus.async_get_clientsession"),
+        patch(
+            "custom_components.arriva_bus.decode_catalog",
+            return_value=SimpleNamespace(aliases=lambda *args: (ROUTE.destination,)),
+        ),
+        patch("custom_components.arriva_bus.TransitHttpClient"),
+        patch("custom_components.arriva_bus.ArrivaCoordinator", return_value=coordinator),
+        patch("custom_components.arriva_bus.ArrivaLiveActivity", return_value=AsyncMock()),
+    ):
+        assert await async_setup_entry(hass, entry)
+
+    coordinator.async_set_enabled.assert_awaited_once_with(True)
+    updated = hass.config_entries.async_update_entry.call_args.kwargs["data"]
+    assert "initial_active" not in updated
 
 
 @pytest.mark.asyncio

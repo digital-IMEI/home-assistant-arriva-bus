@@ -1,6 +1,12 @@
-Arriva Bus 1.1.1 fixes installation through HACS. The release archive now places
-the integration files directly in HACS's target directory instead of creating a
-second nested `arriva_bus` directory.
+Arriva Bus 1.1.2 makes first-time setup more immediate and improves the public
+documentation.
+
+- A newly configured route now starts tracking explicitly during its first setup.
+- Later restarts still respect a manually or automatically disabled runtime switch.
+- The README now explains the no-code onboarding, all available entities and the
+  built-in iPhone Live Activity in more detail.
+- The first real Live Activity screenshot has been added.
+- The corrected HACS archive structure introduced in 1.1.1 is retained.
 
 It also contains all features introduced with the standalone community release:
 
@@ -17,7 +23,7 @@ It also contains all features introduced with the standalone community release:
 - Live Activity text follows the Home Assistant language (Dutch or English).
 - Existing custom colours are retained; clear the field or choose Default to reset.
 
-Install `arriva_bus.zip` into `/config/custom_components/` and restart Home Assistant.
+Extract `arriva_bus.zip` into `/config/custom_components/arriva_bus/` and restart Home Assistant.
 Existing installations keep the same `arriva_bus` integration domain and do not need to be recreated.
 Refresh the HA frontend or reopen the Companion app after restarting to refresh translations.
 
