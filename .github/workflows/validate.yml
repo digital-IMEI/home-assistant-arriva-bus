@@ -10,6 +10,7 @@ jobs:
   hacs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: hacs/action@main
         with:
           category: integration
@@ -17,4 +18,5 @@ jobs:
   hassfest:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: home-assistant/actions/hassfest@master
