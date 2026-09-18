@@ -1,4 +1,8 @@
-Arriva Bus 1.1.0 is the first release from the standalone community repository.
+Arriva Bus 1.1.1 fixes installation through HACS. The release archive now places
+the integration files directly in HACS's target directory instead of creating a
+second nested `arriva_bus` directory.
+
+It also contains all features introduced with the standalone community release:
 
 - Select a line, direction and stop using the compact GTFS catalogue.
 - Live delay, stop position, trip status and route progress.

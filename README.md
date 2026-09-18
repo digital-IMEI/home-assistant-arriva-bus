@@ -24,7 +24,8 @@ Requires Home Assistant 2026.8.2 or newer.
 ## Manual installation
 
 1. Download `arriva_bus.zip` from the [latest release](https://github.com/digital-IMEI/home-assistant-arriva-bus/releases/latest).
-2. Extract it into `/config/custom_components/` so the manifest is at
+2. Create `/config/custom_components/arriva_bus/` and extract the contents of
+   the archive into that directory. The manifest must be located at
    `/config/custom_components/arriva_bus/manifest.json`.
 3. Restart Home Assistant and refresh the frontend/Companion app.
 4. Open **Settings → Devices & services → Add integration → Arriva Bus**.

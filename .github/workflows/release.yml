@@ -36,7 +36,7 @@ jobs:
           release_version=$(python -c 'import json; print(json.load(open("custom_components/arriva_bus/manifest.json"))["version"])')
           release_tag="v${release_version}"
           if gh release view "$release_tag" >/dev/null 2>&1; then exit 0; fi
-          cd custom_components
-          zip -r ../arriva_bus.zip arriva_bus -x '*/__pycache__/*' '*.pyc'
-          cd ..
+          cd custom_components/arriva_bus
+          zip -r ../../arriva_bus.zip . -x '*/__pycache__/*' '*.pyc'
+          cd ../..
           gh release create "$release_tag" arriva_bus.zip --target "$GITHUB_SHA" --title "Arriva Bus ${release_version}" --notes-file RELEASE_NOTES.md --latest
