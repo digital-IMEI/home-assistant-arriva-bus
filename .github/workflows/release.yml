@@ -39,4 +39,4 @@ jobs:
           cd custom_components
           zip -r ../arriva_bus.zip arriva_bus -x '*/__pycache__/*' '*.pyc'
           cd ..
-          gh release create "$release_tag" arriva_bus.zip --target "$GITHUB_SHA" --title "Arriva Bus ${release_version}" --notes-file ARRIVA_RELEASE.md --latest
+          gh release create "$release_tag" arriva_bus.zip --target "$GITHUB_SHA" --title "Arriva Bus ${release_version}" --notes-file RELEASE_NOTES.md --latest
