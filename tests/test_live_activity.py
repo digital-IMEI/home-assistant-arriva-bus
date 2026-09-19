@@ -150,6 +150,17 @@ def test_waiting_is_one_line_without_progress() -> None:
     assert "progress" not in _manager(snapshot)._payload(snapshot)["data"]
 
 
+@pytest.mark.parametrize("delay,expected", [(121, "+2:01"), (30, "+30s"), (None, "waiting"), (0, "waiting")])
+def test_waiting_bus_displays_reported_delay_on_right(delay, expected):
+    snapshot = replace(_underway(), is_underway=False, delay_seconds=delay)
+    manager = _manager(snapshot)
+    manager._hass.config.language = "en"
+    payload = manager._payload(snapshot)
+    assert payload["data"]["critical_text"] == expected
+    assert payload["message"].endswith("Waiting to depart")
+    assert "progress" not in payload["data"]
+
+
 def test_device_link_targets_only_configured_route() -> None:
     manager = _manager(BusSnapshot())
     with patch("custom_components.arriva_bus.live_activity.dr.async_get") as registry:

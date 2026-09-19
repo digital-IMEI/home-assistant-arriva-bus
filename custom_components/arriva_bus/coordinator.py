@@ -694,6 +694,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
             runtime_active=True,
             inactive_reason=None,
             is_underway=trip_started,
+            delay_seconds=current.delay_seconds if trip_started else None,
             scheduled_wait_until=None,
             realtime_connected=True,
             realtime_stale=False,
@@ -722,13 +723,27 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         )
         event_stop_name = cached_stop_name or current_stop_name or last_passed_stop_name
 
-        # Waiting at the origin may expose the physical position, but it may
-        # never expose punctuality until a DEPARTURE/ONROUTE proves progress.
-        if trip_started and event.punctuality is not None:
+        # Retain reported positive delay before departure without marking the
+        # journey underway. Planned dwell time must not look like a late start.
+        waiting_delay = event.punctuality
+        if not trip_started and event.timestamp is not None:
+            for call in current.route_dwell_calls:
+                if call.stop_code == stop_place_code:
+                    waiting_delay = min(
+                        event.punctuality or 0,
+                        max(0, int((event.timestamp - call.departure).total_seconds())),
+                    )
+                    break
+        if event.punctuality is not None and (
+            trip_started or (waiting_delay is not None and waiting_delay > 0)
+        ):
             wait_until = self._scheduled_wait(event)
             updated = replace(
                 updated,
-                delay_seconds=0 if wait_until is not None else event.punctuality,
+                delay_seconds=(
+                    0 if wait_until is not None
+                    else event.punctuality if trip_started else waiting_delay
+                ),
                 raw_delay_seconds=event.punctuality,
                 scheduled_wait_until=wait_until,
                 delay_source_stop=event_stop_name or current.last_passed_stop,

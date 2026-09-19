@@ -1,5 +1,10 @@
-Arriva Bus 1.1.3 improves branding, journey-state recognition and the public
-documentation.
+Arriva Bus 1.1.4 shows reported positive delay before the bus departs.
+
+- The Live Activity keeps “Waiting to depart” in the body and shows the delay on the right.
+- Waiting remains gray, without route progress. Missing delay is never guessed.
+- Scheduled dwell time is respected when accepting predeparture delay.
+
+Previous improvements:
 
 - Replaces the packaged generic bus artwork with Arriva branding.
 - Adds status-dependent Live Activity icons for waiting, underway, at a stop, early,

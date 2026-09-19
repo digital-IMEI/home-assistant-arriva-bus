@@ -49,11 +49,13 @@ def _language(hass: HomeAssistant) -> str:
     return "nl" if isinstance(language, str) and language.casefold().startswith("nl") else "en"
 
 
-def _critical_delay_text(delay_seconds: int | None, language: str = "nl") -> str:
+def _critical_delay_text(
+    delay_seconds: int | None, language: str = "nl", *, tolerance: bool = True
+) -> str:
     """Build compact Dynamic Island text."""
     if delay_seconds is None:
         return "geen info" if language == "nl" else "no info"
-    if -30 < delay_seconds <= 60:
+    if tolerance and -30 < delay_seconds <= 60:
         return "op tijd" if language == "nl" else "on time"
     value = abs(delay_seconds)
     minutes, seconds = divmod(value, 60)
@@ -438,8 +440,14 @@ class ArrivaLiveActivity:
                     if data.last_journey_cancelled
                     else ("geen info" if language == "nl" else "no info")
                     if data.realtime_stale
-                    else _critical_delay_text(data.delay_seconds, language)
-                    if data.is_underway
+                    else _critical_delay_text(
+                        data.delay_seconds, language, tolerance=data.is_underway
+                    )
+                    if data.is_underway or (
+                        data.journey_number is not None
+                        and data.delay_seconds is not None
+                        and data.delay_seconds > 0
+                    )
                     else ("wacht" if language == "nl" else "waiting")
                 ),
                 "notification_icon": _activity_icon(data),
