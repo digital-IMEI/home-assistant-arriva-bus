@@ -443,7 +443,8 @@ class ArrivaLiveActivity:
                     else _critical_delay_text(
                         data.delay_seconds, language, tolerance=data.is_underway
                     )
-                    if data.is_underway or (
+                    if data.is_underway
+                    or (
                         data.journey_number is not None
                         and data.delay_seconds is not None
                         and data.delay_seconds > 0

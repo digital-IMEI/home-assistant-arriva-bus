@@ -150,7 +150,9 @@ def test_waiting_is_one_line_without_progress() -> None:
     assert "progress" not in _manager(snapshot)._payload(snapshot)["data"]
 
 
-@pytest.mark.parametrize("delay,expected", [(121, "+2:01"), (30, "+30s"), (None, "waiting"), (0, "waiting")])
+@pytest.mark.parametrize(
+    "delay,expected", [(121, "+2:01"), (30, "+30s"), (None, "waiting"), (0, "waiting")]
+)
 def test_waiting_bus_displays_reported_delay_on_right(delay, expected):
     snapshot = replace(_underway(), is_underway=False, delay_seconds=delay)
     manager = _manager(snapshot)

@@ -741,8 +741,11 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
             updated = replace(
                 updated,
                 delay_seconds=(
-                    0 if wait_until is not None
-                    else event.punctuality if trip_started else waiting_delay
+                    0
+                    if wait_until is not None
+                    else event.punctuality
+                    if trip_started
+                    else waiting_delay
                 ),
                 raw_delay_seconds=event.punctuality,
                 scheduled_wait_until=wait_until,

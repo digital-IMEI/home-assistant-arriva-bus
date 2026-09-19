@@ -227,7 +227,6 @@ async def test_late_waiting_bus_retains_delay_without_starting_trip():
     assert obj.data.delay_seconds == 121
 
 
-
 @pytest.mark.asyncio
 async def test_dynamic_realtime_isolation_and_progress_to_selected_target():
     obj = coordinator()
