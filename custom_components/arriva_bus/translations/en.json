@@ -86,7 +86,8 @@
           "underway": "Underway",
           "realtime_unavailable": "Realtime temporarily unavailable",
           "cancelled": "Journey cancelled",
-          "previous_cancelled": "Previous journey cancelled"
+          "previous_cancelled": "Previous journey cancelled",
+          "loading": "Loading data"
         }
       },
       "scheduled_target": {

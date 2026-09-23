@@ -210,7 +210,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         self._recent_events.clear()
         self._last_event_order_timestamp = None
         self._last_stop_progress_timestamp = None
-        self.async_set_updated_data(self._idle_snapshot())
+        self.async_set_updated_data(replace(self._idle_snapshot(), is_loading=True))
 
         self._kv6 = Kv6Subscriber(self.route.line_planning_number)
         self._kv6_task = self._entry.async_create_background_task(
@@ -343,7 +343,14 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
                 and stream_reference is not None
                 and (now - stream_reference) > REALTIME_STALE_AFTER
             )
-            if not self.data.realtime_stale and (trip_data_stale or stream_stale):
+            initial_data_timed_out = (
+                self.data.is_loading
+                and self._active_selected_at is not None
+                and now - self._active_selected_at > REALTIME_STALE_AFTER
+            )
+            if not self.data.realtime_stale and (
+                trip_data_stale or stream_stale or initial_data_timed_out
+            ):
                 _LOGGER.warning("Arriva bus realtime state became stale")
                 self.async_set_updated_data(
                     replace(
@@ -355,6 +362,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
                         delay_observed_at=None,
                         realtime_connected=self.realtime_connected,
                         realtime_stale=True,
+                        is_loading=False,
                     )
                 )
 
@@ -429,6 +437,10 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         try:
             candidates = await self._client.async_get_journeys()
         except TransitHttpError as err:
+            if self.data.is_loading and self._active is None:
+                self.async_set_updated_data(
+                    replace(self.data, is_loading=False, realtime_stale=True)
+                )
             self._selection_error = str(err)
             self._next_journey_refresh_at = now + JOURNEY_DISCOVERY_INTERVAL
             _LOGGER.warning("Arriva bus journey refresh failed: %s", err)
@@ -513,6 +525,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         self._next_journey_refresh_at = now + JOURNEY_REVALIDATE_INTERVAL
         self.async_set_updated_data(
             BusSnapshot(
+                is_loading=True,
                 route_stop_codes=route,
                 route_dwell_calls=dwells,
                 journey_number=chosen.journey_number,
@@ -693,6 +706,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
             current,
             runtime_active=True,
             inactive_reason=None,
+            is_loading=False,
             is_underway=trip_started,
             delay_seconds=current.delay_seconds if trip_started else None,
             scheduled_wait_until=None,

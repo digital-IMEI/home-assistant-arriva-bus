@@ -630,3 +630,22 @@ async def test_failed_removed_phone_clear_preserves_settings():
     with pytest.raises(HomeAssistantError):
         await manager.async_update_settings({"mobile_device": []})
     assert manager._settings["mobile_device"] == ["one"]
+
+
+@pytest.mark.parametrize(
+    "language,label,short",
+    [
+        ("nl", "Gegevens laden…", "laden"),
+        ("en", "Loading data…", "loading"),
+    ],
+)
+def test_loading_is_distinct_from_waiting(language, label, short):
+    snapshot = BusSnapshot(runtime_active=True, is_loading=True, journey_number=17)
+    manager = _manager(snapshot)
+    with patch("custom_components.arriva_bus.live_activity._language", return_value=language):
+        payload = manager._payload(snapshot)
+    assert payload["message"] == label
+    assert payload["data"]["critical_text"] == short
+    assert payload["data"]["notification_icon"] == "mdi:progress-clock"
+    assert payload["data"]["notification_icon_color"] == "#9E9E9E"
+    assert "progress" not in payload["data"]

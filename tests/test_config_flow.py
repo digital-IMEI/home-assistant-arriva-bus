@@ -583,3 +583,61 @@ async def test_cleared_colors_are_saved_as_resets_without_reloading():
         "on_time_color": "default",
     }
     entry.runtime_data.live_activity.async_update_settings.assert_awaited_once_with(result["data"])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("kind,underway", [("ONSTOP", False), ("DEPARTURE", True)])
+async def test_first_vehicle_event_finishes_loading(kind, underway):
+    from custom_components.arriva_bus.sensor import journey_status
+
+    obj = coordinator()
+    obj.data = replace(obj.data, is_loading=True)
+    assert journey_status(obj.data) == "loading"
+    await obj._async_handle_kv6_event(event(planning="other", event_type=kind))
+    assert obj.data.is_loading
+    await obj._async_handle_kv6_event(event(event_type=kind))
+    assert not obj.data.is_loading
+    assert obj.data.is_underway == underway
+    assert journey_status(obj.data) == ("underway" if underway else "waiting")
+
+
+@pytest.mark.asyncio
+async def test_discovery_empty_or_failed_ends_loading():
+    from custom_components.arriva_bus.api import TransitHttpError
+
+    obj = coordinator()
+    obj._active = None
+    obj.data = replace(obj.data, is_loading=True)
+    obj._client.async_get_journeys = AsyncMock(side_effect=TransitHttpError("offline"))
+    await obj._async_refresh_journeys(event().timestamp)
+    assert not obj.data.is_loading
+    assert obj.data.realtime_stale
+    obj.data = replace(obj.data, is_loading=True)
+    obj._client.async_get_journeys = AsyncMock(return_value=[])
+    await obj._async_refresh_journeys(event().timestamp)
+    assert not obj.data.is_loading
+    assert not obj.data.realtime_stale
+    assert obj.data.journey_number is None
+
+
+@pytest.mark.asyncio
+async def test_initial_vehicle_timeout_and_recovery():
+    from datetime import timedelta
+
+    from custom_components.arriva_bus.const import REALTIME_STALE_AFTER
+
+    obj = coordinator()
+    now = event().timestamp
+    obj.data = replace(obj.data, is_loading=True)
+    obj._active_selected_at = now - REALTIME_STALE_AFTER - timedelta(seconds=1)
+    obj._maintenance_lock = asyncio.Lock()
+    obj._next_journey_refresh_at = now + timedelta(minutes=10)
+    obj._client.psa_loaded_for = now.date()
+    obj._psa_retry_after = None
+    with patch("custom_components.arriva_bus.coordinator.dt_util.now", return_value=now):
+        await obj._async_maintenance()
+    assert not obj.data.is_loading
+    assert obj.data.realtime_stale
+    await obj._async_handle_kv6_event(event(event_type="ONSTOP"))
+    assert not obj.data.realtime_stale
+    assert not obj.data.is_loading

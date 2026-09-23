@@ -21,6 +21,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     DOMAIN,
     JOURNEY_STATUS_CANCELLED,
+    JOURNEY_STATUS_LOADING,
     JOURNEY_STATUS_NO_BUS,
     JOURNEY_STATUS_OPTIONS,
     JOURNEY_STATUS_PREVIOUS_CANCELLED,
@@ -127,6 +128,8 @@ def journey_status(data: BusSnapshot) -> str:
         return JOURNEY_STATUS_CANCELLED
     if data.realtime_stale:
         return JOURNEY_STATUS_REALTIME_UNAVAILABLE
+    if data.is_loading:
+        return JOURNEY_STATUS_LOADING
     if data.is_underway:
         return JOURNEY_STATUS_UNDERWAY
     if data.journey_number is not None:

@@ -83,6 +83,8 @@ def _activity_icon(data: BusSnapshot) -> str:
         return "mdi:cancel"
     if data.realtime_stale:
         return "mdi:cloud-alert"
+    if data.is_loading:
+        return "mdi:progress-clock"
     if data.target_has_passed:
         return "mdi:bus-stop"
     if not data.is_underway:
@@ -133,6 +135,9 @@ def _message(data: BusSnapshot, language: str = "nl") -> str:
             if language == "nl"
             else "Stop passed\nLoading next service…"
         )
+    if data.is_loading and not data.realtime_stale:
+        label = "Gegevens laden…" if language == "nl" else "Loading data…"
+        return (f"{scheduled} · " if scheduled else "") + label
     if not data.is_underway and not data.realtime_stale:
         if scheduled:
             return (
@@ -418,7 +423,8 @@ class ArrivaLiveActivity:
         if data.last_journey_cancelled:
             color = "#F44336"
         elif (
-            not data.is_underway
+            data.is_loading
+            or not data.is_underway
             or data.target_has_passed
             or data.realtime_stale
             or data.scheduled_wait_until is not None
@@ -440,6 +446,8 @@ class ArrivaLiveActivity:
                     if data.last_journey_cancelled
                     else ("geen info" if language == "nl" else "no info")
                     if data.realtime_stale
+                    else ("laden" if language == "nl" else "loading")
+                    if data.is_loading
                     else _critical_delay_text(
                         data.delay_seconds, language, tolerance=data.is_underway
                     )
@@ -462,6 +470,7 @@ class ArrivaLiveActivity:
                     }
                     if data.route_progress is not None
                     and data.is_underway
+                    and not data.is_loading
                     and not data.last_journey_cancelled
                     and not data.realtime_stale
                     and data.scheduled_wait_until is None

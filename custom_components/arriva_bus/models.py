@@ -68,6 +68,7 @@ class BusSnapshot:
     line: str = ""
     destination: str = ""
 
+    is_loading: bool = False
     runtime_active: bool = False
     inactive_reason: str | None = None
 
