@@ -87,7 +87,8 @@
           "realtime_unavailable": "Realtime temporarily unavailable",
           "cancelled": "Journey cancelled",
           "previous_cancelled": "Previous journey cancelled",
-          "loading": "Loading data"
+          "loading": "Loading data",
+          "waiting_next": "Waiting for next bus"
         }
       },
       "scheduled_target": {

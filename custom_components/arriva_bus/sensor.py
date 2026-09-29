@@ -28,6 +28,7 @@ from .const import (
     JOURNEY_STATUS_REALTIME_UNAVAILABLE,
     JOURNEY_STATUS_UNDERWAY,
     JOURNEY_STATUS_WAITING,
+    JOURNEY_STATUS_WAITING_NEXT,
 )
 from .coordinator import ArrivaCoordinator
 from .models import BusSnapshot
@@ -133,6 +134,8 @@ def journey_status(data: BusSnapshot) -> str:
     if data.is_underway:
         return JOURNEY_STATUS_UNDERWAY
     if data.journey_number is not None:
+        if data.last_received_at is None:
+            return JOURNEY_STATUS_WAITING_NEXT
         return JOURNEY_STATUS_WAITING
     return JOURNEY_STATUS_NO_BUS
 

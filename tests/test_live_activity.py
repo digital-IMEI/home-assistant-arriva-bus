@@ -144,6 +144,7 @@ def test_waiting_is_one_line_without_progress() -> None:
     snapshot = BusSnapshot(
         target_scheduled_time=datetime(2026, 9, 18, 11, 21, tzinfo=UTC),
         route_progress=0,
+        last_received_at=datetime(2026, 9, 18, 11, tzinfo=UTC),
     )
     assert "\n" not in _message(snapshot)
     assert _message(snapshot).endswith(" · Wacht op vertrek")
@@ -154,7 +155,12 @@ def test_waiting_is_one_line_without_progress() -> None:
     "delay,expected", [(121, "+2:01"), (30, "+30s"), (None, "waiting"), (0, "waiting")]
 )
 def test_waiting_bus_displays_reported_delay_on_right(delay, expected):
-    snapshot = replace(_underway(), is_underway=False, delay_seconds=delay)
+    snapshot = replace(
+        _underway(),
+        is_underway=False,
+        delay_seconds=delay,
+        last_received_at=datetime(2026, 9, 18, 11, tzinfo=UTC),
+    )
     manager = _manager(snapshot)
     manager._hass.config.language = "en"
     payload = manager._payload(snapshot)
@@ -648,4 +654,26 @@ def test_loading_is_distinct_from_waiting(language, label, short):
     assert payload["data"]["critical_text"] == short
     assert payload["data"]["notification_icon"] == "mdi:progress-clock"
     assert payload["data"]["notification_icon_color"] == "#9E9E9E"
+    assert "progress" not in payload["data"]
+
+
+@pytest.mark.parametrize(
+    "language,label",
+    [
+        ("nl", "Wachten op volgende bus"),
+        ("en", "Waiting for next bus"),
+    ],
+)
+def test_future_bus_is_waiting_not_loading(language, label):
+    snapshot = BusSnapshot(
+        runtime_active=True,
+        journey_number=17,
+        target_scheduled_time=datetime(2026, 9, 18, 11, 21, tzinfo=UTC),
+    )
+    manager = _manager(snapshot)
+    with patch("custom_components.arriva_bus.live_activity._language", return_value=language):
+        payload = manager._payload(snapshot)
+    assert payload["message"].endswith(" · " + label)
+    assert payload["data"]["critical_text"] in ("wacht", "waiting")
+    assert payload["data"]["notification_icon"] == "mdi:clock-outline"
     assert "progress" not in payload["data"]

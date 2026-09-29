@@ -140,9 +140,11 @@ def _message(data: BusSnapshot, language: str = "nl") -> str:
         return (f"{scheduled} · " if scheduled else "") + label
     if not data.is_underway and not data.realtime_stale:
         if scheduled:
-            return (
-                f"{scheduled} · {'Wacht op vertrek' if language == 'nl' else 'Waiting to depart'}"
-            )
+            if data.last_received_at is None:
+                label = "Wachten op volgende bus" if language == "nl" else "Waiting for next bus"
+            else:
+                label = "Wacht op vertrek" if language == "nl" else "Waiting to depart"
+            return f"{scheduled} · {label}"
         return "Geen bus onderweg" if language == "nl" else "No bus underway"
     if data.realtime_stale and (data.current_stop or data.last_passed_stop):
         label = "Laatst bekende halte" if language == "nl" else "Last known stop"

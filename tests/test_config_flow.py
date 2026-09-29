@@ -621,7 +621,7 @@ async def test_discovery_empty_or_failed_ends_loading():
 
 
 @pytest.mark.asyncio
-async def test_initial_vehicle_timeout_and_recovery():
+async def test_disconnected_stream_and_recovery():
     from datetime import timedelta
 
     from custom_components.arriva_bus.const import REALTIME_STALE_AFTER
@@ -641,3 +641,46 @@ async def test_initial_vehicle_timeout_and_recovery():
     await obj._async_handle_kv6_event(event(event_type="ONSTOP"))
     assert not obj.data.realtime_stale
     assert not obj.data.is_loading
+
+
+@pytest.mark.asyncio
+async def test_loaded_future_journey_waits_for_bus_instead_of_loading():
+    from datetime import timedelta
+
+    from custom_components.arriva_bus.live_activity import _message
+    from custom_components.arriva_bus.sensor import journey_status
+
+    obj = coordinator()
+    now = event().timestamp
+    obj._active = None
+    obj.data = replace(obj._idle_snapshot(), is_loading=True)
+    obj._client.async_get_journeys = AsyncMock(
+        return_value=[JourneySelection(17, "2026-09-17", now + timedelta(hours=1), "27001")]
+    )
+    obj._client.async_get_route = AsyncMock(return_value=("NL:S:origin", ROUTE.target_stop_code))
+    obj._client.get_dwell_calls.return_value = ()
+    await obj._async_refresh_journeys(now)
+    assert not obj.data.is_loading
+    assert journey_status(obj.data) == "waiting_next"
+    assert "Waiting for next bus" in _message(obj.data, "en")
+
+    # A connected stream with no events for this future journey is normal.
+    obj._kv6 = SimpleNamespace(connected=True, last_frame_received_at=now)
+    obj._maintenance_lock = asyncio.Lock()
+    obj._next_journey_refresh_at = now + timedelta(hours=1)
+    obj._client.psa_loaded_for = now.date()
+    obj._psa_retry_after = None
+    with patch(
+        "custom_components.arriva_bus.coordinator.dt_util.now",
+        return_value=now + timedelta(minutes=10),
+    ):
+        await obj._async_maintenance()
+    assert not obj.data.is_loading
+    assert not obj.data.realtime_stale
+    assert journey_status(obj.data) == "waiting_next"
+
+    await obj._async_handle_kv6_event(event(event_type="ONSTOP"))
+    assert journey_status(obj.data) == "waiting"
+    assert "Waiting to depart" in _message(obj.data, "en")
+    await obj._async_handle_kv6_event(event(event_type="DEPARTURE"))
+    assert journey_status(obj.data) == "underway"

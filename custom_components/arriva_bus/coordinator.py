@@ -343,14 +343,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
                 and stream_reference is not None
                 and (now - stream_reference) > REALTIME_STALE_AFTER
             )
-            initial_data_timed_out = (
-                self.data.is_loading
-                and self._active_selected_at is not None
-                and now - self._active_selected_at > REALTIME_STALE_AFTER
-            )
-            if not self.data.realtime_stale and (
-                trip_data_stale or stream_stale or initial_data_timed_out
-            ):
+            if not self.data.realtime_stale and (trip_data_stale or stream_stale):
                 _LOGGER.warning("Arriva bus realtime state became stale")
                 self.async_set_updated_data(
                     replace(
@@ -525,7 +518,7 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         self._next_journey_refresh_at = now + JOURNEY_REVALIDATE_INTERVAL
         self.async_set_updated_data(
             BusSnapshot(
-                is_loading=True,
+                is_loading=False,
                 route_stop_codes=route,
                 route_dwell_calls=dwells,
                 journey_number=chosen.journey_number,

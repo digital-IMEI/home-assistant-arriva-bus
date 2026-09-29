@@ -87,7 +87,8 @@
           "realtime_unavailable": "Realtime tijdelijk niet beschikbaar",
           "cancelled": "Rit uitgevallen",
           "previous_cancelled": "Vorige rit uitgevallen",
-          "loading": "Gegevens laden"
+          "loading": "Gegevens laden",
+          "waiting_next": "Wachten op volgende bus"
         }
       },
       "scheduled_target": {
