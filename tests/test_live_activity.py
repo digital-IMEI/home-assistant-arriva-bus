@@ -660,8 +660,8 @@ def test_loading_is_distinct_from_waiting(language, label, short):
 @pytest.mark.parametrize(
     "language,label",
     [
-        ("nl", "Wachten op volgende bus"),
-        ("en", "Waiting for next bus"),
+        ("nl", "Volgende bus"),
+        ("en", "Next bus"),
     ],
 )
 def test_future_bus_is_waiting_not_loading(language, label):
@@ -673,7 +673,9 @@ def test_future_bus_is_waiting_not_loading(language, label):
     manager = _manager(snapshot)
     with patch("custom_components.arriva_bus.live_activity._language", return_value=language):
         payload = manager._payload(snapshot)
-    assert payload["message"].endswith(" · " + label)
+    assert payload["message"].startswith(label + ": ")
+    assert "\n" not in payload["message"]
+    assert len(payload["message"]) <= 19
     assert payload["data"]["critical_text"] in ("wacht", "waiting")
     assert payload["data"]["notification_icon"] == "mdi:clock-outline"
     assert "progress" not in payload["data"]

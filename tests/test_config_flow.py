@@ -662,7 +662,7 @@ async def test_loaded_future_journey_waits_for_bus_instead_of_loading():
     await obj._async_refresh_journeys(now)
     assert not obj.data.is_loading
     assert journey_status(obj.data) == "waiting_next"
-    assert "Waiting for next bus" in _message(obj.data, "en")
+    assert _message(obj.data, "en").startswith("Next bus: ")
 
     # A connected stream with no events for this future journey is normal.
     obj._kv6 = SimpleNamespace(connected=True, last_frame_received_at=now)
