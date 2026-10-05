@@ -99,7 +99,7 @@ the bar shows visual progress from the first stop to the stop selected during se
 | Waiting for departure | Clock |
 | Underway and on time | Bus |
 | At a stop / selected stop passed | Bus stop |
-| Running early | Fast-forward |
+| Running early | Bus (configured early colour) |
 | Delayed | Bus warning |
 | Cancelled | Cancel |
 | Realtime temporarily unavailable | Cloud warning |

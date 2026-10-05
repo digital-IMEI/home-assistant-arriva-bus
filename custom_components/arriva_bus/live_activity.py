@@ -94,7 +94,7 @@ def _activity_icon(data: BusSnapshot) -> str:
     if data.delay_seconds is not None and data.delay_seconds > 60:
         return "mdi:bus-alert"
     if data.delay_seconds is not None and data.delay_seconds <= -30:
-        return "mdi:fast-forward"
+        return "mdi:bus"
     return "mdi:bus"
 
 
@@ -362,6 +362,11 @@ class ArrivaLiveActivity:
                 self._last_sent_at = None
             elif self._active or self._clear_pending:
                 self._retry_sync()
+            return
+
+        # Starting with a loading card can leave it visible while iOS batches
+        # the first silent update. Wait for useful data before creating it.
+        if data.is_loading and not self._active:
             return
 
         payload = self._payload(data)

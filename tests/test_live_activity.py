@@ -65,7 +65,7 @@ def test_status_colors_override_delay_when_no_running_bus(changes, expected):
         ({"is_underway": False}, "mdi:clock-outline"),
         ({"delay_seconds": 0}, "mdi:bus"),
         ({"delay_seconds": 61}, "mdi:bus-alert"),
-        ({"delay_seconds": -30}, "mdi:fast-forward"),
+        ({"delay_seconds": -30}, "mdi:bus"),
         ({"current_stop": "Gulpen"}, "mdi:bus-stop"),
         (
             {"scheduled_wait_until": datetime(2026, 9, 17, 12, tzinfo=UTC)},
@@ -679,3 +679,19 @@ def test_future_bus_is_waiting_not_loading(language, label):
     assert payload["data"]["critical_text"] in ("wacht", "waiting")
     assert payload["data"]["notification_icon"] == "mdi:clock-outline"
     assert "progress" not in payload["data"]
+
+
+@pytest.mark.asyncio
+async def test_new_activity_starts_with_data_instead_of_loading():
+    manager = _manager(BusSnapshot(runtime_active=True, is_loading=True))
+    await manager._async_sync()
+    manager._async_send.assert_not_awaited()
+    manager._coordinator.data = BusSnapshot(
+        runtime_active=True,
+        journey_number=17,
+        target_scheduled_time=datetime(2026, 9, 18, 11, 21, tzinfo=UTC),
+    )
+    await manager._async_sync()
+    manager._async_send.assert_awaited_once()
+    assert "laden" not in manager._async_send.await_args.args[0].lower()
+    assert "Volgende bus:" in manager._async_send.await_args.args[0]

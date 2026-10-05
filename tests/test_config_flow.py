@@ -684,3 +684,59 @@ async def test_loaded_future_journey_waits_for_bus_instead_of_loading():
     assert "Waiting to depart" in _message(obj.data, "en")
     await obj._async_handle_kv6_event(event(event_type="DEPARTURE"))
     assert journey_status(obj.data) == "underway"
+
+
+@pytest.mark.asyncio
+async def test_timetable_and_vehicle_updates_are_visible_during_route_fetch():
+    obj = coordinator()
+    now = event().timestamp
+    obj._active = None
+    obj.data = replace(obj._idle_snapshot(), is_loading=True)
+    obj._client.async_get_journeys = AsyncMock(
+        return_value=[JourneySelection(17, "2026-09-17", now, "27001")]
+    )
+    route_started = asyncio.Event()
+    finish_route = asyncio.Event()
+
+    async def slow_route(chosen):
+        route_started.set()
+        await finish_route.wait()
+        return ("NL:S:origin", ROUTE.target_stop_code)
+
+    obj._client.async_get_route = slow_route
+    obj._client.get_dwell_calls.return_value = ()
+    task = asyncio.create_task(obj._async_refresh_journeys(now))
+    await route_started.wait()
+    try:
+        assert not obj.data.is_loading
+        assert obj.data.target_scheduled_time == now
+        await obj._async_handle_kv6_event(event())
+        assert obj.data.is_underway
+        assert obj.data.delay_seconds == 121
+    finally:
+        finish_route.set()
+        await task
+    assert obj.data.is_underway
+    assert obj.data.delay_seconds == 121
+    assert obj.data.route_stop_codes == ("NL:S:origin", ROUTE.target_stop_code)
+
+
+@pytest.mark.asyncio
+async def test_route_response_does_not_resurrect_replaced_journey():
+    obj = coordinator()
+    now = event().timestamp
+    obj._active = None
+    obj._client.async_get_journeys = AsyncMock(
+        return_value=[JourneySelection(17, "2026-09-17", now, "27001")]
+    )
+
+    async def replaced_route(chosen):
+        obj._active = None
+        obj.data = obj._idle_snapshot()
+        return ("NL:S:origin", ROUTE.target_stop_code)
+
+    obj._client.async_get_route = replaced_route
+    obj._client.get_dwell_calls.return_value = ()
+    await obj._async_refresh_journeys(now)
+    assert obj.data.journey_number is None
+    assert obj.data.route_stop_codes == ()

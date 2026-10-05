@@ -502,13 +502,6 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
             )
             return
 
-        try:
-            route = await self._client.async_get_route(chosen)
-            dwells = self._client.get_dwell_calls(chosen)
-        except TransitHttpError:
-            _LOGGER.warning("Route unavailable; omitting route progress for %s", chosen.key)
-            route = ()
-            dwells = ()
         if not self._runtime_active or self._shutdown:
             return
         self._active = chosen
@@ -519,8 +512,6 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
         self.async_set_updated_data(
             BusSnapshot(
                 is_loading=False,
-                route_stop_codes=route,
-                route_dwell_calls=dwells,
                 journey_number=chosen.journey_number,
                 operating_day=chosen.operating_day,
                 journey_key=chosen.key,
@@ -536,6 +527,23 @@ class ArrivaCoordinator(DataUpdateCoordinator[BusSnapshot]):
             )
         )
         _LOGGER.info("Tracking Arriva bus journey %s", chosen.key)
+
+        # Timetable data is already usable. Route enrichment must not keep the
+        # loading status visible or prevent trusted vehicle events being applied.
+        try:
+            route = await self._client.async_get_route(chosen)
+            dwells = self._client.get_dwell_calls(chosen)
+        except TransitHttpError:
+            _LOGGER.warning("Route unavailable; omitting route progress for %s", chosen.key)
+            route = ()
+            dwells = ()
+        if not self._runtime_active or self._shutdown:
+            return
+        if self._active is None or self._active.key != chosen.key:
+            return
+        self.async_set_updated_data(
+            replace(self.data, route_stop_codes=route, route_dwell_calls=dwells)
+        )
 
         for event in tuple(self._recent_events):
             if not self._event_matches_active(event):
